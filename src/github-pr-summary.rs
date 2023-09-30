@@ -105,7 +105,7 @@ async fn handler(
         match issues.list_comments(pull_number).send().await {
             Ok(comments) => {
                 for c in comments.items {
-                    if c.body.unwrap_or_default().starts_with("Hello, I am a [code review bot]") {
+                    if c.body.unwrap_or_default().starts_with("您好，我是[古文通止机器人]") {
                         comment_id = c.id;
                         break;
                     }
@@ -118,7 +118,7 @@ async fn handler(
         }
     } else {
         // PR OPEN or Trigger phrase: create a new comment
-        match issues.create_comment(pull_number, "Hello, I am a [code review bot](https://github.com/flows-network/github-pr-summary/) on [flows.network](https://flows.network/).\n\nIt could take a few minutes for me to analyze this PR. Relax, grab a cup of coffee and check back later. Thanks!").await {
+        match issues.create_comment(pull_number, "您好，我是[古文通止机器人]\n\n我可能需要几分钟的时间来分析这个 PR。放松一下，喝杯咖啡，稍后再回来查看。谢谢！").await {
             Ok(comment) => {
                 comment_id = comment.id;
             }
@@ -161,7 +161,7 @@ async fn handler(
     }
 
     let chat_id = format!("PR#{pull_number}");
-    let system = &format!("您是一位经验丰富的软件开发人员。您将担任标题为 GitHub Pull Request 的审阅者\"{}\".", title);
+    let system = &format!("您是一位经验丰富的编辑校对人员。您将担任标题为 GitHub Pull Request 的审阅者\"{}\".", title);
     let mut openai = OpenAIFlows::new();
     openai.set_retry_times(3);
 
@@ -197,7 +197,7 @@ async fn handler(
     }
 
     let mut resp = String::new();
-    resp.push_str("您好，我是 [flows.network](https://flows.network/) 上的[代码审查机器人](https://github.com/flows-network/github-pr-summary/)。以下是我对此 PR 中代码提交的评论。\n\n------\n\n");
+    resp.push_str("您好，我是[古文通止机器人]。以下是我对此 PR 中代码提交的评论。\n\n------\n\n");
     if reviews.len() > 1 {
         log::debug!("Sending all reviews to OpenAI for summarization");
         let co = ChatOptions {
