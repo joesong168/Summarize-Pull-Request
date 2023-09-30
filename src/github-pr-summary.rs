@@ -161,7 +161,7 @@ async fn handler(
     }
 
     let chat_id = format!("PR#{pull_number}");
-    let system = &format!("You are an experienced software developer. You will act as a reviewer for a GitHub Pull Request titled \"{}\".", title);
+    let system = &format!("您是一位经验丰富的软件开发人员。您将担任标题为 GitHub Pull Request 的审阅者\"{}\".", title);
     let mut openai = OpenAIFlows::new();
     openai.set_retry_times(3);
 
@@ -175,7 +175,7 @@ async fn handler(
             restart: true,
             system_prompt: Some(system),
         };
-        let question = "The following is a GitHub patch. Please summarize the key changes and identify potential problems. Start with the most important findings.\n\n".to_string() + truncate(commit, CHAR_SOFT_LIMIT);
+        let question = "以下是 GitHub 补丁。请总结主要变化并找出潜在问题。从最重要的发现开始。\n\n".to_string() + truncate(commit, CHAR_SOFT_LIMIT);
         match openai.chat_completion(&chat_id, &question, &co).await {
             Ok(r) => {
                 if reviews_text.len() < CHAR_SOFT_LIMIT {
@@ -197,7 +197,7 @@ async fn handler(
     }
 
     let mut resp = String::new();
-    resp.push_str("Hello, I am a [code review bot](https://github.com/flows-network/github-pr-summary/) on [flows.network](https://flows.network/). Here are my reviews of code commits in this PR.\n\n------\n\n");
+    resp.push_str("您好，我是 [flows.network](https://flows.network/) 上的[代码审查机器人](https://github.com/flows-network/github-pr-summary/)。以下是我对此 PR 中代码提交的评论。\n\n------\n\n");
     if reviews.len() > 1 {
         log::debug!("Sending all reviews to OpenAI for summarization");
         let co = ChatOptions {
@@ -205,7 +205,7 @@ async fn handler(
             restart: true,
             system_prompt: Some(system),
         };
-        let question = "Here is a set of summaries for software source code patches. Each summary starts with a ------ line. Please write an overall summary considering all the individual summary. Please present the potential issues and errors first, following by the most important findings, in your summary.\n\n".to_string() + &reviews_text;
+        let question = "这是一组软件源代码补丁的摘要。每个摘要都以 ------ 行开头。请考虑所有单独的摘要，撰写总体摘要。请在摘要中首先介绍潜在的问题和错误，然后介绍最重要的发现。\n\n".to_string() + &reviews_text;
         match openai.chat_completion(&chat_id, &question, &co).await {
             Ok(r) => {
                 resp.push_str(&r.choice);
